@@ -7,14 +7,6 @@
 #include <psqldb.hpp>
 
 
-// Test Topic
-struct topic {
-    std::string topic;
-    bool write;
-    bool read;
-    bool primary;
-};
-
 
 int main (int argc, char* argv[]) {
 
@@ -55,14 +47,37 @@ int main (int argc, char* argv[]) {
             "T1"
     );
 
-
-    LOG(INFO) << devCredentials.getConnString();
-
     psqldb::PsqlDb databaseDev;
 
-    // initialize and connect database
-    databaseDev.init(machineConfig, devCredentials);
+    // Some sample topics
+    // lockid, topicname, WRT, READ, IsPrimary
+    auto topic1 = psqldb::topic{111,"topic1", true, true, true};
+    auto topic2 = psqldb::topic{222,"topic2", true, true, false};
 
-    LOG(INFO) << __PRETTY_FUNCTION__;
+    std::vector<psqldb::topic> topics;
+    topics.push_back(topic1);
+    topics.push_back(topic2);
+
+
+
+    // initialize and connect database
+    if(databaseDev.init(machineConfig, devCredentials, topics)){
+        LOG(INFO) << "Database Initialize SUCCESS";
+        /*TEST SOME FILE STUFF
+         * FAULT TOLERANCE
+         * LOAD BALANCING LOGIC ETC.
+         *
+         */
+
+        // databaseDev.lockTopic(123);
+        // std::this_thread::sleep_for(std::chrono::seconds(5));
+
+
+    } else{
+        LOG(INFO) << "Database Initialize FAIL";
+        return 0;
+    }
+
+
     return 0;
 }

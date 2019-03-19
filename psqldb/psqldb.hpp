@@ -2,13 +2,17 @@
 #define DBPSQL_HPP
 
 #include <utility>
+#include <datatypes.h>
 
 
 #include <psqlstatements.hpp>
 #include <string>
 #include <glog/logging.h>
 #include <pqxx/pqxx>
+#include <unordered_map>
 
+#include <thread>
+#include <chrono>
 
 /**
  * PostgreSQL Database Implementation
@@ -38,65 +42,24 @@ namespace psqldb {
         return invokeDynamic(invokeDynamic(inv,data),all...);
     }
 
-    const std::string space = " ";
-
-    /**
-     * machine Configs To check in DB
-     * */
-    struct machineConfig {
-        std::string procname;
-        int lockId;
-        int numTopics;
-        std::string topics; // comma separated topics
-        explicit machineConfig(std::string procname, const int lockId, const int numtopics, const std::string& topics) :
-        procname(std::move(procname)), lockId(lockId), numTopics(numtopics), topics(std::move(topics)) {}
-    };
-
-
-    /**
-     * Db Credentials
-     * */
-    struct dbCredentials {
-
-        std::string host;
-        std::string dbname;
-        std::string port;
-        std::string user;
-        std::string password;
-
-        // DB Connector String
-        std::string connectString;
-
-        explicit dbCredentials(const std::string& host, const std::string& dbname, const std::string& port, const std::string& user, const std::string& password) :
-        host(host), dbname(dbname), port(port), user(user), password(password) {
-
-            // build connection string
-            connectString =
-                    "host="    + host     + space +
-                    "dbname="  + dbname   + space +
-                    "port="    + port     + space +
-                    "user="    + user     + space +
-                    "password="+ password;
-        }
-
-        const std::string getConnString(){
-            return connectString;
-        }
-    };
-
-
     class PsqlDb {
     private:
         std::shared_ptr<pqxx::connection> connHandler;
 
         // basic table create / drop
         void createTableIfNotExists();
-        void deleteTable();
+        void dropLockTable();
+        void dropInfoTable();
+
+        void updateRecordByLockId(int lockid); // update record time / to hold lock
+        void updateRecordPrimary(int lockid, bool primaryup); // primary comes back up
 
         // prepare table statements
         void prepareAllStatements();
         void prepInsertInfoTbl();
         void prepInsertTopicTbl();
+        void prepUpdateRecByLockId();
+        void prepUpdatePrimUp();
         void prepLock();
         void prepUnlock();
 
@@ -127,21 +90,57 @@ namespace psqldb {
             const int lockid_;
         };
 
+
     public:
+        ~PsqlDb()  {
+             connHandler->disconnect();
+             LOG(INFO) << "DB Disconnected!";
+        }
+
         // initialize
-        void init(machineConfig& machineconfig, dbCredentials& dbcredentials);
+        bool init(machineConfig& machineconfig, dbCredentials& dbcredentials, std::vector<topic>& topics);
+
+
+
+//        void lockPrimaryTopic(int lockid) {
+//            /**
+//             * it locks this record without expiration for primary
+//             * sets primary up to true
+//             * updates time every 100 milliseconds
+//             * */
+//            uint32_t counter=0;
+//            lockguard locker_lockid(this, lockid);
+//            LOG(INFO) << "Lock Acquired for PRIMARY TOPIC! " << lockid;
+//            for(;;) {
+//                if(++counter % 10000 == 0) {
+//                    // updateRecord();
+//                    // readRecord if write access false stop
+//                    break;
+//                } // if
+//            }
+//            LOG(INFO) << "Lock Released for PRIMARY TOPIC! " << lockid;
+//        }
+//
+//        void lockSecondaryTopic(int lockid) {
+//            uint32_t counter=0;
+//            // read record time
+//            lockguard locker_lockid(this, lockid);
+//            LOG(INFO) << "Lock Acquired for SECONDARY TOPIC!" << lockid;
+//            for(;;) {
+//                if(++counter % 10000 == 0) {
+//                    // updateRecord(); Timer write / read access no cares
+//                    // Update Record
+//                    // Sleep for 200 milliseconds
+//                    break;
+//                } // if
+//            } // break ends here
+//        }
+
+
+
     };
 
-
-
-
-
-
-
-
 }
-
-
 
 
 #endif

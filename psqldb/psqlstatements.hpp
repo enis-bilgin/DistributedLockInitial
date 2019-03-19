@@ -6,7 +6,6 @@
 
 namespace psqldb {
 
-
     /**
      * TABLE NAME INFO = info_distributed_dev
      * TABLE NAME = distributed_dev
@@ -39,7 +38,7 @@ namespace psqldb {
             ");";
 
     // delete table
-    static const char * DROPTOPICTABLE = "DROP TABLE distributed_dev";
+    static const char * DROPLOCKTABLE = "DROP TABLE distributed_dev";
     static const char * DROPINFOTABLE = "DROP TABLE info_distributed_dev";
 
 
@@ -57,8 +56,19 @@ namespace psqldb {
             "INSERT INTO distributed_dev (" \
             "lock_id,topic_name,write_access,read_access,primary_up) "
             "VALUES ($1,$2,$3,$4,$5)" \
-            "ON CONFLICT (topic_name) DO UPDATE "
-            "SET expiration_time=current_timestamp";
+            "ON CONFLICT (lock_id) DO UPDATE "
+            "SET topic_name=$2, primary_up=$5, expiration_time=current_timestamp";
+
+    static const char * PREPUPDATEDBYLOCKID =
+            "UPDATE distributed_dev " \
+            "SET expiration_time=current_timestamp " \
+            "WHERE lock_id=$1";
+
+
+    static const char * PREPUPDATEPRIMARYUP =
+            "UPDATE distributed_dev " \
+            "SET primary_up=$2, expiration_time=current_timestamp " \
+            "WHERE lock_id=$1";
 
 
     // lock unlock with KEY
