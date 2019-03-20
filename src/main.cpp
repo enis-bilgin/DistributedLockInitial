@@ -6,8 +6,17 @@
 
 #include <psqldb.hpp>
 
+#include <chrono>
+#include <thread>
+#include <atomic>
+#include <future>
+
+#include <atomic>
 
 
+/******************************************
+ *  TEST APPLICATION FOR DISTRIBUTED LOCK *
+ ******************************************/
 int main (int argc, char* argv[]) {
 
     // google logging
@@ -64,14 +73,31 @@ int main (int argc, char* argv[]) {
     if(databaseDev.init(machineConfig, devCredentials, topics)){
         LOG(INFO) << "Database Initialize SUCCESS";
         /*TEST SOME FILE STUFF
-         * FAULT TOLERANCE
-         * LOAD BALANCING LOGIC ETC.
-         *
+         * FAULT TOLERANCE (primary)
+         * LOAD BALANCING (secondary)
          */
 
-        // databaseDev.lockTopic(123);
-        // std::this_thread::sleep_for(std::chrono::seconds(5));
+///**Act as primary*/
+//        for(;;){
+//
+//            psqldb::PsqlDb::lockguard locking(&databaseDev, 111);
+//            databaseDev.updateRecordPrimary(111, true);
+//            databaseDev.updateRecordByLockId(111);
+//            LOG(INFO) << "PRIMARY WRITING ";
+//             // locking as primary
+//        }
 
+
+/**Act as secondary*/
+
+//        for(;;) {
+//            psqldb::PsqlDb::lockguard locking(&databaseDev, 111);
+//            if(!databaseDev.isPrimaryUp(111) || databaseDev.timeElapsedRec(111) > 300) {
+//            databaseDev.updateRecordPrimary(111, false);
+//            databaseDev.updateRecordByLockId(111);
+//                LOG(INFO) << "SECONDARY WRITING ";
+//            }
+//        }
 
     } else{
         LOG(INFO) << "Database Initialize FAIL";

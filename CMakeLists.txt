@@ -34,5 +34,6 @@ target_link_libraries(
         gflags
         pqxx
         pq
+        pthread
 )
 

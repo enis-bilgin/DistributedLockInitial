@@ -58,6 +58,7 @@ namespace psqldb {
 
     // Insert Into Lock Table with Prepared Statement
     void PsqlDb::insertLockTbl(const int lockid, const std::string &topicname, const bool write_access, const bool read_access, const bool primary_up) {
+        lockguard lockguard1(this, lockid);
         pqxx::work W(*connHandler.get());
         auto W_invocation = W.prepared("insertlocktbl");
         invokeDynamic(W_invocation, lockid, topicname.c_str(), write_access, read_access, primary_up);
@@ -67,6 +68,7 @@ namespace psqldb {
 
     // Insert Into Info Table with Prepared Statement
     void PsqlDb::insertInfoTbl(const std::string &procname, const int lockid, const int numtopics, const std::string& topics) {
+        lockguard lockguard1(this, lockid);
         pqxx::work W(*connHandler.get());
         auto W_invocation = W.prepared("insertinfotbl");
         invokeDynamic(W_invocation, procname.c_str(), lockid, numtopics, topics.c_str());
@@ -76,6 +78,7 @@ namespace psqldb {
 
     // update record by lock id
     void PsqlDb::updateRecordByLockId(int lockid) {
+        lockguard lockguard1(this, lockid);
         pqxx::work W(*connHandler.get());
         auto W_invocation = W.prepared("updatebylockid");
         invokeDynamic(W_invocation, lockid);
@@ -86,6 +89,7 @@ namespace psqldb {
 
     // update primary up or down
     void PsqlDb::updateRecordPrimary(int lockid, bool primaryup) {
+        lockguard lockguard1(this, lockid);
         pqxx::work W(*connHandler.get());
         auto W_invocation = W.prepared("updateprimup");
         invokeDynamic(W_invocation, lockid, primaryup);
@@ -93,6 +97,27 @@ namespace psqldb {
         W.commit();
     }
 
+
+    // Is Primary Up
+    bool PsqlDb::isPrimaryUp(int lockid) {
+        lockguard lockguard1(this, lockid);
+        pqxx::nontransaction N(*connHandler.get());
+        auto N_invocation = N.prepared("isprimaryup");
+        invokeDynamic(N_invocation, lockid);
+        pqxx::result R = N_invocation.exec();
+        return R.empty() ? false :  R.begin()[0].as<bool>();
+    }
+
+    // Time Difference in Microseconds
+    int PsqlDb::timeElapsedRec(int lockid) {
+        lockguard lockguard1(this, lockid);
+        pqxx::nontransaction N(*connHandler.get());
+        auto N_invocation = N.prepared("timediffmicros");
+        invokeDynamic(N_invocation, lockid);
+        pqxx::result R = N_invocation.exec();
+        // time Elapsed in microseconds divide by 1000 to get milliseconds
+        return R.empty() ? 0 :  (R.begin()[0].as<int>() / 1000);
+    }
 
     // lock
     void PsqlDb::lock(const int lockid) const {
@@ -148,15 +173,26 @@ namespace psqldb {
         connHandler->prepare("updateprimup", PREPUPDATEPRIMARYUP);
     }
 
+    void PsqlDb::prepTimeDiff() {
+        connHandler->prepare("timediffmicros", PREPTIMEDIFFMICROS);
+    }
+
+    // prep select by lock id
+    void PsqlDb::prepIsPrimaryUp() {
+        connHandler->prepare("isprimaryup", PREPISPRIMARYUP);
+
+    }
+
     // prepare statements
     void PsqlDb::prepareAllStatements() {
         prepInsertInfoTbl();
         prepInsertTopicTbl();
         prepUpdateRecByLockId();
         prepUpdatePrimUp();
+        prepIsPrimaryUp();
+        prepTimeDiff();
         prepLock();
         prepUnlock();
     }
-
 
 }

@@ -51,8 +51,7 @@ namespace psqldb {
         void dropLockTable();
         void dropInfoTable();
 
-        void updateRecordByLockId(int lockid); // update record time / to hold lock
-        void updateRecordPrimary(int lockid, bool primaryup); // primary comes back up
+
 
         // prepare table statements
         void prepareAllStatements();
@@ -60,6 +59,8 @@ namespace psqldb {
         void prepInsertTopicTbl();
         void prepUpdateRecByLockId();
         void prepUpdatePrimUp();
+        void prepIsPrimaryUp();
+        void prepTimeDiff();
         void prepLock();
         void prepUnlock();
 
@@ -70,6 +71,14 @@ namespace psqldb {
         // lock functions
         void lock(const int lockid) const ;
         void unlock(const int lockid) const ;
+
+
+    public:
+        ~PsqlDb()  {
+             connHandler->disconnect();
+             LOG(INFO) << "DB Disconnected!";
+        }
+
 
         // RAII lock wrapper
         class lockguard {
@@ -91,52 +100,13 @@ namespace psqldb {
         };
 
 
-    public:
-        ~PsqlDb()  {
-             connHandler->disconnect();
-             LOG(INFO) << "DB Disconnected!";
-        }
-
         // initialize
         bool init(machineConfig& machineconfig, dbCredentials& dbcredentials, std::vector<topic>& topics);
 
-
-
-//        void lockPrimaryTopic(int lockid) {
-//            /**
-//             * it locks this record without expiration for primary
-//             * sets primary up to true
-//             * updates time every 100 milliseconds
-//             * */
-//            uint32_t counter=0;
-//            lockguard locker_lockid(this, lockid);
-//            LOG(INFO) << "Lock Acquired for PRIMARY TOPIC! " << lockid;
-//            for(;;) {
-//                if(++counter % 10000 == 0) {
-//                    // updateRecord();
-//                    // readRecord if write access false stop
-//                    break;
-//                } // if
-//            }
-//            LOG(INFO) << "Lock Released for PRIMARY TOPIC! " << lockid;
-//        }
-//
-//        void lockSecondaryTopic(int lockid) {
-//            uint32_t counter=0;
-//            // read record time
-//            lockguard locker_lockid(this, lockid);
-//            LOG(INFO) << "Lock Acquired for SECONDARY TOPIC!" << lockid;
-//            for(;;) {
-//                if(++counter % 10000 == 0) {
-//                    // updateRecord(); Timer write / read access no cares
-//                    // Update Record
-//                    // Sleep for 200 milliseconds
-//                    break;
-//                } // if
-//            } // break ends here
-//        }
-
-
+        void updateRecordByLockId(int lockid); // update record time / to hold lock
+        void updateRecordPrimary(int lockid, bool primaryup); // primary comes back up
+        bool isPrimaryUp(int lockid); // is primary up
+        int timeElapsedRec(int lockid);
 
     };
 

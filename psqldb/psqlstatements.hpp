@@ -34,7 +34,7 @@ namespace psqldb {
             "  write_access boolean not null," \
             "  read_access boolean not null,"
             "  primary_up boolean not null," \
-            "  expiration_time timestamp default current_timestamp" \
+            "  update_time timestamp default current_timestamp" \
             ");";
 
     // delete table
@@ -57,18 +57,26 @@ namespace psqldb {
             "lock_id,topic_name,write_access,read_access,primary_up) "
             "VALUES ($1,$2,$3,$4,$5)" \
             "ON CONFLICT (lock_id) DO UPDATE "
-            "SET topic_name=$2, primary_up=$5, expiration_time=current_timestamp";
+            "SET topic_name=$2, primary_up=$5, update_time=current_timestamp";
 
     static const char * PREPUPDATEDBYLOCKID =
             "UPDATE distributed_dev " \
-            "SET expiration_time=current_timestamp " \
+            "SET update_time=current_timestamp " \
             "WHERE lock_id=$1";
 
 
     static const char * PREPUPDATEPRIMARYUP =
             "UPDATE distributed_dev " \
-            "SET primary_up=$2, expiration_time=current_timestamp " \
+            "SET primary_up=$2, update_time=current_timestamp " \
             "WHERE lock_id=$1";
+
+
+    static const char * PREPISPRIMARYUP ="SELECT primary_up FROM distributed_dev WHERE lock_id=$1";
+
+    // get time
+    static const char * PREPTIMEDIFFMICROS = "SELECT (EXTRACT(epoch FROM current_timestamp)*1000000) " \
+                                             "- (EXTRACT(epoch FROM update_time)*1000000) " \
+                                             "FROM distributed_dev WHERE lock_id=$1";
 
 
     // lock unlock with KEY
