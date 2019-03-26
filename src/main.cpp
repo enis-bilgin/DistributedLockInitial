@@ -51,17 +51,17 @@ int main (int argc, char* argv[]) {
      * */
     psqldb::machineConfig machineConfig(
             "AWSMachineOne",
-            123,
             2,
-            "T1"
+            "notice/ebilgin,aaa,bbb,ccc,dddd,eee,ffff,ggg,hhh,kkk,llll,mmmm,nnnn,dddd,ccccc,fffff",
+            "sec/ebilgin,sec/aaa,sec/bbb,sec/ccc,sec/dddd,sec/eee,sec/ffff,sec/ggg,sec/hhh,sec/kkk,sec/llll,sec/mmmm,sec/nnnn,sec/dddd,sec/ccccc,sec/fffff"
     );
 
     psqldb::PsqlDb databaseDev;
 
     // Some sample topics
     // lockid, topicname, WRT, READ, IsPrimary
-    auto topic1 = psqldb::topic{111,"topic1", true, true, true};
-    auto topic2 = psqldb::topic{222,"topic2", true, true, false};
+    auto topic1 = psqldb::topic{111,"recordername1", true, false, true};
+    auto topic2 = psqldb::topic{222,"recordername2", true, true, false};
 
     std::vector<psqldb::topic> topics;
     topics.push_back(topic1);
@@ -77,9 +77,8 @@ int main (int argc, char* argv[]) {
          * LOAD BALANCING (secondary)
          */
 
-///**Act as primary*/
+/**Act as primary*/
 //        for(;;){
-//
 //            psqldb::PsqlDb::lockguard locking(&databaseDev, 111);
 //            databaseDev.updateRecordPrimary(111, true);
 //            databaseDev.updateRecordByLockId(111);
@@ -89,7 +88,6 @@ int main (int argc, char* argv[]) {
 
 
 /**Act as secondary*/
-
 //        for(;;) {
 //            psqldb::PsqlDb::lockguard locking(&databaseDev, 111);
 //            if(!databaseDev.isPrimaryUp(111) || databaseDev.timeElapsedRec(111) > 300) {
@@ -98,6 +96,8 @@ int main (int argc, char* argv[]) {
 //                LOG(INFO) << "SECONDARY WRITING ";
 //            }
 //        }
+
+
 
     } else{
         LOG(INFO) << "Database Initialize FAIL";

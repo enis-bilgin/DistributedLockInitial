@@ -60,13 +60,15 @@ namespace psqldb {
         void prepUpdateRecByLockId();
         void prepUpdatePrimUp();
         void prepIsPrimaryUp();
+        void prepReadAccess();
+        void prepWriteAccess();
         void prepTimeDiff();
         void prepLock();
         void prepUnlock();
 
         // prep functions
         void insertLockTbl(const int lockid, const std::string &topicname, const bool write_access, const bool read_access, const bool primary_up);
-        void insertInfoTbl(const std::string &procname, const int lockid, const int numtopics, const std::string& topics);
+        void insertInfoTbl(const std::string &procname, const int numtopics, const std::string &primrec, const std::string &secrec);
 
         // lock functions
         void lock(const int lockid) const ;
@@ -106,6 +108,8 @@ namespace psqldb {
         void updateRecordByLockId(int lockid); // update record time / to hold lock
         void updateRecordPrimary(int lockid, bool primaryup); // primary comes back up
         bool isPrimaryUp(int lockid); // is primary up
+        bool readAccess(int lockid);
+        bool writeAccess(int lockid);
         int timeElapsedRec(int lockid);
 
     };
