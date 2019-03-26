@@ -52,7 +52,6 @@ namespace psqldb {
         void dropInfoTable();
 
 
-
         // prepare table statements
         void prepareAllStatements();
         void prepInsertInfoTbl();
@@ -72,14 +71,7 @@ namespace psqldb {
 
         // lock functions
         void lock(const int lockid) const ;
-        void unlock(const int lockid) const ;
-
-
-    public:
-        ~PsqlDb()  {
-             connHandler->disconnect();
-             LOG(INFO) << "DB Disconnected!";
-        }
+        void unlock(const int lockid) const;
 
 
         // RAII lock wrapper
@@ -102,14 +94,24 @@ namespace psqldb {
         };
 
 
+    public:
+        ~PsqlDb()  {
+             connHandler->disconnect();
+             LOG(INFO) << "DB Disconnected!";
+        }
+
+
+
+
+
         // initialize
-        bool init(machineConfig& machineconfig, dbCredentials& dbcredentials, std::vector<topic>& topics);
+        bool init(machineConfig& machineconfig, dbCredentials& dbcredentials, std::vector<recordertest>& topics);
 
         void updateRecordByLockId(int lockid); // update record time / to hold lock
         void updateRecordPrimary(int lockid, bool primaryup); // primary comes back up
         bool isPrimaryUp(int lockid); // is primary up
-        bool readAccess(int lockid);
         bool writeAccess(int lockid);
+        bool readAccess(int lockid);
         int timeElapsedRec(int lockid);
 
     };

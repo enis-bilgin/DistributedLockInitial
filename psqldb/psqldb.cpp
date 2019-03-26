@@ -3,7 +3,7 @@
 namespace psqldb {
 
     // initate connection
-    bool PsqlDb::init(machineConfig& machineconfig, dbCredentials& dbcredentials, std::vector<topic>& topics) {
+    bool PsqlDb::init(machineConfig& machineconfig, dbCredentials& dbcredentials, std::vector<recordertest>& topics) {
 
         try {
             connHandler = std::make_shared<pqxx::connection>(dbcredentials.getConnString().c_str());
@@ -14,7 +14,7 @@ namespace psqldb {
                 prepareAllStatements();
 
                 // Info Table Test
-                insertInfoTbl(machineconfig.procname, machineconfig.numtopics, machineconfig.prim_recs, machineconfig.sec_recs);
+                insertInfoTbl(machineconfig.procname, machineconfig.numrecorders, machineconfig.prim_recs, machineconfig.sec_recs);
 
                 // Insert some topics
                 for(const auto &each : topics)
@@ -158,7 +158,6 @@ namespace psqldb {
     }
 
 
-
     /**
      * Prepare Staments
      * */
@@ -211,7 +210,6 @@ namespace psqldb {
     void PsqlDb::prepWriteAccess() {
         connHandler->prepare("writeaccess", PREPWRITEACCESS);
     }
-
 
     // prepare statements
     void PsqlDb::prepareAllStatements() {

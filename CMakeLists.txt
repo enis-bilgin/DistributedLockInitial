@@ -9,7 +9,6 @@ include_directories(
         src
         psqldb
 
-
 )
 
 # standard
@@ -20,7 +19,6 @@ set(
         PSQLDBFILES
         src/main.cpp
         psqldb/psqldb.cpp
-
 )
 
 

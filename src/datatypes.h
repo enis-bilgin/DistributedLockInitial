@@ -11,11 +11,11 @@ namespace psqldb {
      * */
     struct machineConfig {
         std::string procname;
-        int numtopics;
+        int numrecorders;
         std::string prim_recs; // comma separated topics
         std::string sec_recs;
         explicit machineConfig(const std::string& procname, const int numtopics, const std::string& prim_recs, const std::string& sec_recs) :
-                procname(procname),  numtopics(numtopics), prim_recs(prim_recs), sec_recs(sec_recs) {}
+                procname(procname),  numrecorders(numtopics), prim_recs(prim_recs), sec_recs(sec_recs) {}
     };
 
 
@@ -52,7 +52,7 @@ namespace psqldb {
     };
 
     // Test Topic
-    struct topic {
+    struct recordertest {
         int lockid;
         std::string topic;
         bool write;

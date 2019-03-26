@@ -60,10 +60,10 @@ int main (int argc, char* argv[]) {
 
     // Some sample topics
     // lockid, topicname, WRT, READ, IsPrimary
-    auto topic1 = psqldb::topic{111,"recordername1", true, false, true};
-    auto topic2 = psqldb::topic{222,"recordername2", true, true, false};
+    auto topic1 = psqldb::recordertest{111,"recordername1", true, false, true};
+    auto topic2 = psqldb::recordertest{222,"recordername2", true, true, false};
 
-    std::vector<psqldb::topic> topics;
+    std::vector<psqldb::recordertest> topics;
     topics.push_back(topic1);
     topics.push_back(topic2);
 

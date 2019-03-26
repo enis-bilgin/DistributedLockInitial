@@ -27,7 +27,7 @@ namespace psqldb {
             ");";
 
 
-    // create topic table if not exists
+    // create recordertest table if not exists
     static const char * CREATETOPICTABLE =
             "CREATE TABLE IF NOT EXISTS lock_recorders (" \
             "  lock_id int not null unique primary key," \
@@ -70,7 +70,6 @@ namespace psqldb {
             "UPDATE lock_recorders " \
             "SET primary_up=$2, update_time=current_timestamp " \
             "WHERE lock_id=$1";
-
 
 
     // get time
